@@ -126,6 +126,7 @@ namespace server_
                     numBytesRead += n;
                     numBytesToRead -= n;
                     //Отправляем файл
+
                     //sender.Send(bytes, bytes.Length, endPoint);
                 }
 
