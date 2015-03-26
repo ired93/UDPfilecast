@@ -109,10 +109,7 @@ namespace server_
         
         richTextBox4.Text += "Отправка файла размером " + fs.Length + " байт";
 
-        Byte[] bytes = new Byte[fs.Length];
-
-        fs.Read(bytes, 0, bytes.Length);
-            try
+                try
             {
                 Byte[] bytes = new Byte[fs.Length];
                 int numBytesToRead = (int)fs.Length;
