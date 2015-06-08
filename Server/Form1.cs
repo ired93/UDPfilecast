@@ -101,6 +101,8 @@ namespace server_
             sender.Send(bytes, bytes.Length, endPoint);
             stream.Close();
         }
+        public static bool messageSent = false;
+      
         private void SendFile()
         {
             // Создаем файловый поток и переводим его в байты
@@ -111,22 +113,51 @@ namespace server_
 
                 try
             {
-                Byte[] bytes = new Byte[fs.Length];
-                int numBytesToRead = (int)fs.Length;
-                int numBytesRead = 0;
-                int file_count = (int)fDet.FILESIZE / 8192;
-                while (numBytesToRead > 0)
+                int buff_size = 8192;
+                Byte[] bytes = new Byte[buff_size];
+                int file_count = (int)fDet.FILESIZE / buff_size;
+                int a = (int)fDet.FILESIZE / buff_size;
+                int rest = (int)fDet.FILESIZE - file_count * buff_size;
+                Byte[] bytes2 = new Byte[rest];
+                fs.Position = 0;
+                for (int i = 1; i <= file_count; i++)
                 {
-                    int n = fs.Read(bytes, numBytesRead, numBytesToRead);               
-                    if (n == 0)
-                        break;
-                    sender.Send(bytes, numBytesToRead, endPoint);
-                    numBytesRead += n;
-                    numBytesToRead -= n;
+                    fs.Read(bytes, 0, bytes.Length);
+                    sender.Send(bytes, bytes.Length, endPoint);
+                    Thread.Sleep(10);
+                    fs.Position = buff_size * i;       
+                }
+                fs.Read(bytes2, 0, bytes2.Length);
+                sender.Send(bytes2, bytes2.Length, endPoint);
+                
+             /*   int rest = (int)fDet.FILESIZE - file_count * buff_size;
+                Byte[] bytes2 = new Byte[rest];
+                fs.Read(bytes2, 0, rest);
+                sender.Send(bytes2, bytes2.Length, endPoint);
+                */
+                
+             /*   while (file_count > 0)
+                {                  
+                    fs.Read(bytes, 0, bytes.Length);
+                    sender.Send(bytes, bytes.Length, endPoint);
+                    Thread.Sleep(1000);
+                    fs.Position += buff_size;
+                    file_count--;
+                    
+                    
+                }
+               /* int a = (int)fDet.FILESIZE - file_count * 8192;
+                Byte[] bytes2 = new Byte[a];
+                fs.Read(bytes2, 0, a);
+                sender.Send(bytes2, bytes2.Length, endPoint);
+                fs.Flush();
+                    */
+                    //sender.Send(bytes, numBytesToRead, endPoint);
+                    
                     //Отправляем файл
 
                     //sender.Send(bytes, bytes.Length, endPoint);
-                }
+                
 
             }
             catch (Exception e)
@@ -141,6 +172,7 @@ namespace server_
             }
             richTextBox4.Text += "\n";
             richTextBox4.Text += "Файл успешно отправлен.";
+            
         
         }
         private void button1_Click(object sender, EventArgs e)
@@ -180,6 +212,16 @@ namespace server_
         }
 
         private void richTextBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void richTextBox4_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void richTextBox3_TextChanged(object sender, EventArgs e)
         {
 
         }

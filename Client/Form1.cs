@@ -77,27 +77,60 @@ namespace Client
             }
 
         }
+        public static bool messageReceived = false;
+        
         public void ReceiveFile()
         {
-            long f = (int)fileDet.FILESIZE;
-            long x = fileDet.FILESIZE / 8192;
             string data = Encoding.ASCII.GetString(receiveBytes);
-           
+            int buff_size = 8192;
+            int file_count = ((int)fileDet.FILESIZE / buff_size);
+            
+ 
                 try
                 {
                     richTextBox1.Text += "-----------*******Ожидайте получение файла*******-----------";
 
                     // Получаем файл
-                    receiveBytes = receivingUdpClient.Receive(ref RemoteIpEndPoint);
+                    //receiveBytes = receivingUdpClient.Receive(ref RemoteIpEndPoint);
 
                     // Преобразуем и отображаем данные
-                    richTextBox1.Text += "----Файл получен...Сохраняем...";
+                   // richTextBox1.Text += "----Файл получен...Сохраняем...";
 
                     // Создаем временный файл с полученным расширением
                     fs = new FileStream("temp." + fileDet.FILETYPE, FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
-                    fs.Write(receiveBytes, 0, receiveBytes.Length);
+                    fs.Position = 0;
+                    for (int i = 1; i <= file_count + 1; i++)
+                    {
+                        receiveBytes = receivingUdpClient.Receive(ref RemoteIpEndPoint);
+                        fs.Write(receiveBytes, 0, receiveBytes.Length);
+                        fs.Position = buff_size * i;
+                        messageReceived = true;
+                    }
+                        
+                    
+                    while (!messageReceived)
+                    {
+                        Thread.Sleep(10);
+                    }
+                        
+                        
+                    
+                //    receiveBytes = receivingUdpClient.Receive(ref RemoteIpEndPoint);
+                 //   fs.Write(receiveBytes, 0, receiveBytes.Length);
 
                     richTextBox1.Text += "----Файл сохранен...";
+                    /*
+                    while (file_count > 0)
+                    {
+                        receiveBytes = receivingUdpClient.Receive(ref RemoteIpEndPoint);
+                        fs.Write(receiveBytes, 0, receiveBytes.Length);
+                        fs.Position += 8192;
+                        file_count--;
+                    }
+                     */
+                   
+                   
+                    
 
                     //Console.WriteLine("-------Открытие файла------");
 
@@ -106,6 +139,7 @@ namespace Client
 
 
                 }
+            
                 catch (Exception eR)
                 {
                     richTextBox1.Text += eR.Message;
@@ -139,6 +173,11 @@ namespace Client
         {
             //Close();
             Process.GetCurrentProcess().Kill();
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
         }
 
     }

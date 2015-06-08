@@ -75,7 +75,6 @@
             this.richTextBox1.Size = new System.Drawing.Size(352, 206);
             this.richTextBox1.TabIndex = 4;
             this.richTextBox1.Text = "";
-
             // 
             // Form1
             // 
@@ -90,6 +89,7 @@
             this.MaximizeBox = false;
             this.Name = "Form1";
             this.Text = "Client";
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
 
         }
