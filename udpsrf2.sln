@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "udpsrf2", "udpsrf2\udpsrf2.csproj", "{AB2D32D8-D39A-46CF-B51C-861CF9F2E34E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "client", "client\client.csproj", "{8E30FB89-DE7B-4324-91A1-FDF7DD05981E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AB2D32D8-D39A-46CF-B51C-861CF9F2E34E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB2D32D8-D39A-46CF-B51C-861CF9F2E34E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB2D32D8-D39A-46CF-B51C-861CF9F2E34E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB2D32D8-D39A-46CF-B51C-861CF9F2E34E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E30FB89-DE7B-4324-91A1-FDF7DD05981E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E30FB89-DE7B-4324-91A1-FDF7DD05981E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E30FB89-DE7B-4324-91A1-FDF7DD05981E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E30FB89-DE7B-4324-91A1-FDF7DD05981E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

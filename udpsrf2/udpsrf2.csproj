@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8E30FB89-DE7B-4324-91A1-FDF7DD05981E}</ProjectGuid>
+    <ProjectGuid>{AB2D32D8-D39A-46CF-B51C-861CF9F2E34E}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>client</RootNamespace>
-    <AssemblyName>client</AssemblyName>
+    <RootNamespace>udpsrf2</RootNamespace>
+    <AssemblyName>udpsrf2</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

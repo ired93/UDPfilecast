@@ -1,0 +1,5 @@
+c:\users\ired\documents\visual studio 2012\Projects\udpsrf2\udpsrf2\bin\Debug\udpsrf2.exe.config
+c:\users\ired\documents\visual studio 2012\Projects\udpsrf2\udpsrf2\bin\Debug\udpsrf2.exe
+c:\users\ired\documents\visual studio 2012\Projects\udpsrf2\udpsrf2\bin\Debug\udpsrf2.pdb
+c:\users\ired\documents\visual studio 2012\Projects\udpsrf2\udpsrf2\obj\Debug\udpsrf2.exe
+c:\users\ired\documents\visual studio 2012\Projects\udpsrf2\udpsrf2\obj\Debug\udpsrf2.pdb
