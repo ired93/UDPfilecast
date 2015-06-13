@@ -1,5 +1,5 @@
-c:\Users\iRED\documents\visual studio 2012\Projects\udpsrf2\client\bin\Debug\client.exe.config
-c:\Users\iRED\documents\visual studio 2012\Projects\udpsrf2\client\bin\Debug\client.exe
-c:\Users\iRED\documents\visual studio 2012\Projects\udpsrf2\client\bin\Debug\client.pdb
-c:\Users\iRED\documents\visual studio 2012\Projects\udpsrf2\client\obj\Debug\client.exe
-c:\Users\iRED\documents\visual studio 2012\Projects\udpsrf2\client\obj\Debug\client.pdb
+C:\Users\iRED\documents\visual studio 2012\Projects\udpsrf2\client\bin\Debug\client.exe.config
+C:\Users\iRED\documents\visual studio 2012\Projects\udpsrf2\client\bin\Debug\client.exe
+C:\Users\iRED\documents\visual studio 2012\Projects\udpsrf2\client\bin\Debug\client.pdb
+C:\Users\iRED\documents\visual studio 2012\Projects\udpsrf2\client\obj\Debug\client.exe
+C:\Users\iRED\documents\visual studio 2012\Projects\udpsrf2\client\obj\Debug\client.pdb
