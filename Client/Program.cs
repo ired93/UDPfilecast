@@ -38,57 +38,78 @@ namespace client
             IPEndPoint server = new IPEndPoint(RemoteIpEndPoint.Address, serverTcpPort);
             TcpClient client = new TcpClient();
             client.Connect(server);
-            client.Close();
-            ReceiveFile();
+            NetworkStream stream = client.GetStream();
+            byte[] ackBytes = new byte[4];
+            byte[] ready = Encoding.ASCII.GetBytes("READY");
+            int offset = 0, bytesRead = 0;
+            do
+            {
+                bytesRead = stream.Read(ackBytes, offset, ackBytes.Length - offset);
+                offset += bytesRead;
+            } while (offset < 4);
+            UInt32 number = BitConverter.ToUInt32(ackBytes, 0);
+            
+            offset = 0; bytesRead = 0;
+            do
+            {
+                bytesRead = stream.Read(ackBytes, offset, ackBytes.Length - offset);
+                offset += bytesRead;
+            } while (offset < 4);
+            UInt32 announseSize = BitConverter.ToUInt32(ackBytes, 0);
+            
+            offset = 0;
+            bytesRead = 0;
+            byte[] byteAnnounces = new byte[announseSize];
+            do
+            {
+                bytesRead = stream.Read(byteAnnounces, offset, byteAnnounces.Length - offset);
+                offset += bytesRead;
+            } while (offset < announseSize);
+            stream.Write(ready, 0, 5);
+            stream.Write(BitConverter.GetBytes(number), 0, 4);
+            Console.WriteLine(number);
+            Console.WriteLine(Encoding.UTF8.GetString(byteAnnounces));
+           client.Close();
+            //ReceiveFile();
+            
             
         }
-        public static void Accept(IPEndPoint rmt)
-        {
-            IPEndPoint server = new IPEndPoint(rmt.Address, serverTcpPort);
-            TcpClient client = new TcpClient();
-            string apt = "Ok";
-            client.Connect(server);
-            byte[] byteString = Encoding.ASCII.GetBytes(apt);
-            
-            client.Client.SendTo(byteString, server);
-            client.Close();
-        }
+
+        
         public static void ReceiveFile()
         {
-            int countSize = 8192;
-            UdpClient receivinfo = new UdpClient(clientUdpPort);
-            MD5CryptoServiceProvider csp = new MD5CryptoServiceProvider();
+            
             IPEndPoint RemoteIpEndPoint = new IPEndPoint(IPAddress.Any, serverUdpPort);
-            byte[] byteCount = receivinfo.Receive(ref RemoteIpEndPoint);
-            string str = Encoding.ASCII.GetString(byteCount);
-            int M = Convert.ToInt32(str);      
-            receivinfo.Close();
-            Thread.Sleep(1000);
-            FileStream fs;
-            string hash = string.Empty;
-            UdpClient receive = new UdpClient(clientUdpPort);   
-            fs = new FileStream("temp.jpg", FileMode.Create, FileAccess.ReadWrite, FileShare.ReadWrite);
-            fs.Position = 0;
-            for (int i = 1; i <= M; i++)
-            {
-                byte[] receiveBytes = receive.Receive(ref RemoteIpEndPoint);
-                fs.Write(receiveBytes, 0, receiveBytes.Length);
+            UdpClient receive = new UdpClient(clientUdpPort);
+            int countSize = 8192;
+ 
+            Byte[] receiveBytes = new Byte[countSize];
+            
+            receiveBytes = receive.Receive(ref RemoteIpEndPoint);
+            
+            
+           
+         
+            
+             /*   
                 
-                byte[] byteHash = csp.ComputeHash(receiveBytes);
-                foreach (byte b in byteHash)
-                    hash += string.Format("{0:x2}", b);
-                fs.Position = i * countSize;
-            }
-            Console.WriteLine(hash);
-            Console.WriteLine("Данные получены ");
-            byte[] receiveHash = receive.Receive(ref RemoteIpEndPoint);
-            string receivedHash = Encoding.ASCII.GetString(receiveHash);
-            Console.WriteLine(receivedHash);
-            IPEndPoint rmt = RemoteIpEndPoint;
-            if (receivedHash == hash)
-                Accept(rmt);
+                byte[] receiveHash = receive.Receive(ref RemoteIpEndPoint);
+                string receivedHash = Encoding.ASCII.GetString(receiveHash);
+                Console.WriteLine(receivedHash);       
+                Thread.Sleep(1000);
+                string apt = "Ok";
+                byte[] byteString = Encoding.ASCII.GetBytes(apt);
+                IPEndPoint server = new IPEndPoint(RemoteIpEndPoint.Address, serverUdpPort);
+                UdpClient udp = new UdpClient();
+                udp.Send(byteString, byteString.Length, server);
+                udp.Close();
+                    a += M;
+                    c += M;
+                    receivedHash = "";
+                    Console.WriteLine(a + " " + c);
+     
             receive.Close();
-            fs.Close();
-        }
+            fs.Close(); */
+        } 
     }
 }

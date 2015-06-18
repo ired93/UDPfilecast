@@ -11,6 +11,7 @@ using System.Threading;
 using System.IO;
 using System.Xml.Serialization;
 using System.Security.Cryptography;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace udpsrf2
 {
@@ -19,14 +20,51 @@ namespace udpsrf2
         [Serializable]
         public class FileDetails
         {
-            public string FILETYPE = "";
-            public long FILESIZE = 0;
+            public long fileSize = 0;
+            public string fileName = "";
+            public DateTime lastWriteDate;
+            public FileDetails(string _fileName)
+            {
+                fileName = _fileName;
+                FileInfo info = new FileInfo(fileName);
+                lastWriteDate = info.LastWriteTime;
+                fileSize = info.Length;
+            }
+            public byte[] byteData()
+            {
+                
+                byte[] dateBytes = BitConverter.GetBytes(lastWriteDate.ToBinary());            
+                byte[] sizeBytes = BitConverter.GetBytes(fileSize);      
+                byte[] stringBytes = Encoding.UTF8.GetBytes(fileName);
+                int size = 16 + stringBytes.Length;
+                byte[] fileInfo = new byte[size];
+                Array.Copy(stringBytes, fileInfo, stringBytes.Length);
+                Array.Copy(sizeBytes, 0, fileInfo, stringBytes.Length, 8);
+                Array.Copy(dateBytes, 0, fileInfo, stringBytes.Length + 8, 8);
+                return fileInfo;
+            }
         }
-        private static FileDetails fileDet = new FileDetails();
+        public class State
+        {
+            public NetworkStream stream;
+            public UInt32 number;
+            public ManualResetEvent manualEvent;
+            public State(NetworkStream stream, UInt32 number, ManualResetEvent manualEvent)
+            {
+                this.stream = stream;
+                this.number = number;
+                this.manualEvent = manualEvent;
+            }
+        }
+        
+ 
         // Поля, связанные с UdpClient
         private static IPAddress remoteIPAddress;
         private const int remotePort = 5003;
         private static IPEndPoint endPoint;
+        private static Int32 ACCEPTING = 1;
+        private static Int32 FILE_ANNOUNCE = 2;
+        private static Int32 WAIT_ACK = 3;
 
         public static UdpClient udp = new UdpClient();
         private static string HANDSHAKE = "Hello";
@@ -34,95 +72,153 @@ namespace udpsrf2
         private static Int32 clientUdpPort = 5002;
         private static Int32 serverTcpPort = 5003;
         private static Int32 clientTcpPort = 5004;
+        private static Int32 serverDataPort = 5005; 
         private static TcpListener server = null;
         private static List<TcpClient> clients;
+        private static List<NetworkStream> streams;
         private static FileStream fs;
+        private static int state;
+        private static UInt32 number = 0;
 
+       
         public static void ClientAccepter()
         {
-            // принимает подключения, добавляя клиентов в глобальный список
             while (true)
             {
-                clients.Add(server.AcceptTcpClient());
-                Console.WriteLine("Client connected from " + clients.Last().Client.RemoteEndPoint.ToString());
+                if (state != ACCEPTING)
+                    break;
+                // принимает подключения, добавляя клиентов в глобальный список
+                while (server.Pending() == true)
+                {
+                    clients.Add(server.AcceptTcpClient());
+                    streams.Add(clients.Last().GetStream());
+                    Console.WriteLine("Client connected from " + clients.Last().Client.RemoteEndPoint.ToString());
+                    if (state == 2) break;
+                }
+                Thread.Sleep(100);
             }
         }
         
 
         static void GetClients()
         {
-            // готовим TCP-сервер
-            server = new TcpListener(IPAddress.Any, serverTcpPort);
-            server.Start();
-            clients = new List<TcpClient>();
-            Thread accepter = new Thread(new ThreadStart(ClientAccepter));
-            accepter.Start();  
-            
-
             // Начинаем перекличку по UDP
-            remoteIPAddress = IPAddress.Broadcast;
+            Thread accepter = new Thread(new ThreadStart(ClientAccepter));
+            state = ACCEPTING;
+            accepter.Start(); remoteIPAddress = IPAddress.Broadcast;
             endPoint = new IPEndPoint(remoteIPAddress, clientUdpPort);
             Byte[] sendBytes = Encoding.ASCII.GetBytes(HANDSHAKE);
             udp.Send(sendBytes, sendBytes.Length, endPoint);
             udp.Close();
-            Console.WriteLine("Жду клиентов");
-            Thread.Sleep(2000);
-            accepter.Interrupt();
+        }
+
+        
+        private static void Announce(FileDetails fDet)
+        {
+            byte[] sizeBytes = BitConverter.GetBytes(fDet.byteData().Length);
+
+            foreach (NetworkStream stream in streams)
+            {
+                stream.Write(BitConverter.GetBytes(number), 0, 4);
+                stream.Write(sizeBytes, 0, sizeBytes.Length);
+                stream.Write(fDet.byteData(), 0, fDet.byteData().Length);
+            }
+        }
+
+
+        private static void GetAck(object _stateinfo)
+        {
+            State stateinfo = (State)_stateinfo;
+            NetworkStream stream = stateinfo.stream;
+            byte[] ackBytes = new byte[9];
+            int offset = 0, bytesRead = 0;
+            do
+            {
+                bytesRead = stream.Read(ackBytes, offset, ackBytes.Length-offset);
+                offset += bytesRead;
+            } while (offset < 9);
+            if (BitConverter.ToUInt32(ackBytes, 5) == number)
+                stateinfo.manualEvent.Set();
+        }
+
+        private static void WaitAck()
+        {
             
+            ManualResetEvent[] manualEvents = new ManualResetEvent[streams.Count];
             
+            State stateInfo;
+            int i = 0;
+            foreach (NetworkStream stream in streams)
+            {
+                manualEvents[i] = new ManualResetEvent(false);
+                stateInfo = new State(stream, number, manualEvents[i]);
+                Thread newThread = new Thread(new ParameterizedThreadStart(GetAck));
+                newThread.Start(stateInfo);
+                i++;
+            }
+            WaitHandle.WaitAll(manualEvents);
         }
         
-        private static void SendFile()
+        private static void SendFile(String filename)
         {
+            state = FILE_ANNOUNCE;            
+            FileDetails fDet = new FileDetails(filename);
+            Announce(fDet);
+
+            state = WAIT_ACK;
+            WaitAck();
+
+
+ /*
             UdpClient sender = new UdpClient();
-            UdpClient sendinfo = new UdpClient();
-            MD5CryptoServiceProvider csp = new MD5CryptoServiceProvider();
-            endPoint = new IPEndPoint(IPAddress.Broadcast, clientUdpPort);
-            
-            Console.WriteLine("Введите путь к файлу и его имя");
-            fs = new FileStream(@Console.ReadLine().ToString(), FileMode.Open, FileAccess.Read);
-            int countSize = 8192;
+            endPoint = new IPEndPoint(IPAddress.Broadcast, serverDataPort);
+            fs = new FileStream(filename, FileMode.Open, FileAccess.Read);
+            int countSize = 1490;
             int fileCount = (int)fs.Length / countSize;
-            int M = fileCount / 2;
             Byte[] bytes = new Byte[countSize];
-            string hash = string.Empty;
-
-            Console.WriteLine("Отправка " + M + " кусков");
-            Byte[] sendBytes = Encoding.ASCII.GetBytes(Convert.ToString(M));
-            sendinfo.Send(sendBytes, sendBytes.Length, endPoint);
-            sendinfo.Close();
-
-            Thread.Sleep(1000);
-
             fs.Position = 0;
-            for (int i = 1; i <= M; i++)
+            for (int i = 1; i <= fileCount; i++)
             {
                 fs.Read(bytes, 0, bytes.Length);
                 sender.SendAsync(bytes, bytes.Length, endPoint);
-                byte[] byteHash = csp.ComputeHash(bytes);
-                foreach (byte b in byteHash)
-                {
-                    hash += string.Format("{0:x2}", b);
-                }
-                
                 fs.Position = i * countSize;
             }
-            Console.WriteLine(hash);
-            Byte[] hashBytes = Encoding.ASCII.GetBytes(hash);
-            sender.Send(hashBytes, hashBytes.Length, endPoint);
-            sender.Close();
-            fs.Close();
-            
-          //  announce(filename);
+            long lastCount = fs.Length - fileCount * countSize;
+            Byte[] lastBytes = new Byte[lastCount];
+            fs.Read(lastBytes, 0, lastBytes.Length);
+            sender.Send(lastBytes, lastBytes.Length, endPoint);
+  * */
         }
+  
         
 
         static void Main(string[] args)
         {
+
+            // готовим TCP-сервер
+            clients = new List<TcpClient>();
+            streams = new List<NetworkStream>();
+            server = new TcpListener(IPAddress.Any, serverTcpPort);
+            server.Start();
+
             GetClients();
 
-            SendFile();
+            Console.WriteLine("Жду клиентов");
+            Thread.Sleep(2000);
+            server.Stop();
 
+            state = FILE_ANNOUNCE;
+            List<String> filenames = new List<String> { "C:\\Users\\iRED\\Desktop\\Broadcast UDP\\virtus.jpg" };
+            foreach (String filename in filenames)
+            {
+                SendFile(filename);
+                number++;
+            }
+
+            foreach (TcpClient client in clients)
+            {
+                client.Close();
+            }
         }
     }
 }
