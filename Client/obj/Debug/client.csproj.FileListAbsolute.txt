@@ -3,3 +3,6 @@ C:\Users\iRED\documents\visual studio 2012\Projects\udpsrf2\client\bin\Debug\cli
 C:\Users\iRED\documents\visual studio 2012\Projects\udpsrf2\client\bin\Debug\client.pdb
 C:\Users\iRED\documents\visual studio 2012\Projects\udpsrf2\client\obj\Debug\client.exe
 C:\Users\iRED\documents\visual studio 2012\Projects\udpsrf2\client\obj\Debug\client.pdb
+C:\Diplom\Shergin Anatoli FIIT-11\UDPfilecast\UDPfilecast\client\bin\Debug\client.exe.config
+C:\Diplom\Shergin Anatoli FIIT-11\UDPfilecast\UDPfilecast\client\obj\Debug\client.exe
+C:\Diplom\Shergin Anatoli FIIT-11\UDPfilecast\UDPfilecast\client\obj\Debug\client.pdb
