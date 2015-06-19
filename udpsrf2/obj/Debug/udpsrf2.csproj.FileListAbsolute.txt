@@ -3,4 +3,3 @@ C:\Users\iRED\documents\visual studio 2012\Projects\udpsrf2\udpsrf2\bin\Debug\ud
 C:\Users\iRED\documents\visual studio 2012\Projects\udpsrf2\udpsrf2\bin\Debug\udpsrf2.pdb
 C:\Users\iRED\documents\visual studio 2012\Projects\udpsrf2\udpsrf2\obj\Debug\udpsrf2.exe
 C:\Users\iRED\documents\visual studio 2012\Projects\udpsrf2\udpsrf2\obj\Debug\udpsrf2.pdb
-C:\Diplom\Shergin Anatoli FIIT-11\UDPfilecast\UDPfilecast\udpsrf2\bin\Debug\udpsrf2.exe.config
